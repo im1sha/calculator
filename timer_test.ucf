@@ -1,0 +1,25 @@
+# clock signal
+
+
+NET clock_100mhz        LOC = E3 | IOSTANDARD = "LVCMOS33"; #clock
+NET reset               LOC = P4 | IOSTANDARD = "LVCMOS33"; #sw15
+  
+  
+# seven-segment LED display
+
+
+NET led_out[6]          LOC = L3 | IOSTANDARD = "LVCMOS33"; #ca
+NET led_out[5]          LOC = N1 | IOSTANDARD = "LVCMOS33"; #cb
+NET led_out[4]          LOC = L5 | IOSTANDARD = "LVCMOS33"; #cc
+NET led_out[3]          LOC = L4 | IOSTANDARD = "LVCMOS33"; #cd
+NET led_out[2]          LOC = K3 | IOSTANDARD = "LVCMOS33"; #ce
+NET led_out[1]          LOC = M2 | IOSTANDARD = "LVCMOS33"; #cf
+NET led_out[0]          LOC = L6 | IOSTANDARD = "LVCMOS33"; #cg
+
+
+NET anode_activate[0]   LOC = N6 | IOSTANDARD = "LVCMOS33"; #an0
+NET anode_activate[1]   LOC = M6 | IOSTANDARD = "LVCMOS33"; #an1
+NET anode_activate[2]   LOC = M3 | IOSTANDARD = "LVCMOS33"; #an2
+NET anode_activate[3]   LOC = N5 | IOSTANDARD = "LVCMOS33"; #an3
+
+
