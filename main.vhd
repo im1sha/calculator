@@ -39,5 +39,34 @@ begin
             current_state <= next_state;
         end if;
     end process;
+	 
+	 FSM_gamma: process (current_state, reset, ok, save, get)
+	 begin 
+		case current_state is
+			when operator_input_state => 
+				if ok = '1' then
+				
+				else
+				
+				end if;
+			when op1_input_state => 
+				if then
+				
+				else
+				
+				end if;
+			when op2_input_state => 
+				if then
+				
+				else
+				
+				end if;
+			when output_state => 
+				if then
+				
+				else
+				
+				end if;
+	 end process;
 end Behavioral;
 
