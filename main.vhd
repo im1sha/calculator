@@ -21,52 +21,75 @@ entity main is
          anode_activate : out std_logic_vector(3 downto 0);      
          -- cathode patterns of 7-segment display 
          led_out : out std_logic_vector(6 downto 0)); 
+         
+                
 end main;
 
-architecture Behavioral of main is
+architecture behavioral of main is
 
-type states is (operator_input_state, op1_input_state, op2_input_state, output_state);
+type states is (state_opr_in, 
+                state_opd1_in, 
+                state_opd2_in, 
+                state_out);
 
 signal current_state, next_state : states;
 
+signal fop : std_logic_vector(1 downto 0);
+
 begin
 
-    FSM_dff: process (clock_100mhz)
+    fsm_dff: process (clock_100mhz, next_state, reset)
     begin
         if reset = '1' then 
-            current_state <= operator_input_state;
+            current_state <= state_opr_in;
         elsif rising_edge (clock_100mhz) then
             current_state <= next_state;
         end if;
     end process;
 	 
-	 FSM_gamma: process (current_state, reset, ok, save, get)
+	 fsm_gamma: process (current_state, reset, ok, save, get)
 	 begin 
-		case current_state is
-			when operator_input_state => 
-				if ok = '1' then
-				
-				else
-				
-				end if;
-			when op1_input_state => 
-				if then
-				
-				else
-				
-				end if;
-			when op2_input_state => 
-				if then
-				
-				else
-				
-				end if;
-			when output_state => 
-				if then
-				
-				else
-				
-				end if;
+        next_state <= state_opr_in;
+--		case current_state is
+--			when state_opr_in => 
+--				if ok = '1' then
+--				
+--				else
+--				
+--				end if;
+--			when state_opd1_in => 
+--				if then
+--				
+--				else
+--				
+--				end if;
+--			when state_opd2_in => 
+--				if then
+--				
+--				else
+--				
+--				end if;
+--			when state_out => 
+--				if then
+--				
+--				else
+--				
+--				end if;
+--            when others => next_state <= state_opr_in;
+--        end case;
 	 end process;
-end Behavioral;
+     
+     fsm_phi: process(current_state)
+     begin
+        case current_state is 
+            when state_opr_in => fop <= "00";
+			when state_opd1_in => fop <= "01";
+			when state_opd2_in => fop <= "10";								
+			when state_out => fop <= "11";				
+            when others => fop <= "00";
+        end case;
+     end process;
+     
+     -- OUTPUT <= fop;  
+end behavioral;
 
