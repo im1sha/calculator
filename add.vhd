@@ -15,21 +15,6 @@ entity add is
            c_out   : out std_logic);
 end add;
 
---
---architecture behavioral of add is
---signal c0: std_logic;
---
---begin
---
---     s(0) <= a(0) xor b(0) xor c_in;
---     c0 <= (a(0) and b(0)) or (a(0) and c_in) or (b(0) and c_in);
---     
---     s(1) <= a(1) xor b(1) xor c0;
---     c_out <= (a(1) and b(1)) or (a(1) and c0) or (b(1) and c0);
---     
---end behavioral;
-
-
 architecture structural of add is
 component full_adder
       port ( 
