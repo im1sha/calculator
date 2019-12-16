@@ -155,7 +155,7 @@ entity divide is
     
     process(is_ready,z_reg)
     begin 
-        if is_ready = '0' then
+        if is_ready = '0' then -- rising_edge(is_ready) then
             quotient_store <= std_logic_vector( z_reg(total-1 downto 0) );
             remainder_store <= std_logic_vector( z_reg(total*2-1 downto total) );
         end if;

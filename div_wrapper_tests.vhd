@@ -27,6 +27,7 @@
 --------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_unsigned.ALL;
  
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -57,8 +58,8 @@ ARCHITECTURE behavior OF div_wrapper_tests IS
    --Inputs
    signal clk : std_logic := '0';
    signal go : std_logic := '0';
-   signal m : std_logic_vector(15 downto 0) := (others => '0');
-   signal n : std_logic_vector(7 downto 0) := (others => '0');
+   signal m : std_logic_vector(15 downto 0) :=  "0000101001110101";
+   signal n : std_logic_vector(7 downto 0) := "00011010";
 
  	--Outputs
    signal quotient : std_logic_vector(7 downto 0);
@@ -96,20 +97,20 @@ BEGIN
 	
 	input_tb : process
 	begin
-		m <= "0000101001110101";
-		n <= "00011010";
-       wait for clk_period/2;
 
+        m <= m + 1;
+        n <= n + 1;
+       wait for clk_period * 1000; 
 	end process;
 	
 	start_proc: process
 	begin
 		
-        wait for clk_period/6;    
+        wait for clk_period;    
         go <= '1';
 
 		wait for clk_period*100;
-       -- go <= '0';  
+        go <= '0';  
 
 	end process;
  

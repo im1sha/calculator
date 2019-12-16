@@ -1,6 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
+
 entity main is
      generic (n : integer := 8);    
      port (a : in  std_logic_vector (n-1 downto 0);
@@ -208,16 +210,25 @@ begin
                                  div_ready,
                                  add_operand_2,
                                  div_operand_2,
-                                 mult_operand_2
+                                 mult_operand_2,
+                                 operand0,
+                                 operand1
                                  )   
-    begin
-        if (rising_edge(div_ready)) and (current_state = s2) and (current_operation_code = code_div) then      
-            operand_2 <= div_operand_2;      
-        elsif (current_state = s2) then                                  
+    begin          
+        if (current_state = s2) then                                  
             if (current_operation_code = code_div) then
-                div_go <= '1';     
+             --   if (div_ready = '1') then      
+             --       operand_2 <= div_operand_2;
+             --   else
+             --       div_go <= '1';  
+             --   end if;
+                if operand1 /= n_zeros then     
+                    operand_2 <= std_logic_vector(signed(operand0) / signed(operand1));
+                else
+                    operand_2 <= (others => '1');
+                end if;
             else
-                div_go <= '0';
+        --        div_go <= '0';
                 if current_operation_code = code_add then
                     operand_2 <= add_operand_2;      
                 elsif current_operation_code = code_mult then                
@@ -226,8 +237,8 @@ begin
                     operand_2 <= (others => '1');
                 end if;
             end if;
-        else 
-            div_go <= '0';       
+        --else 
+        --    div_go <= '0';       
         end if;
     end process;
          

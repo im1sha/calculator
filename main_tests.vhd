@@ -126,11 +126,7 @@ BEGIN
    
    a_proc: process
    begin	
-      if a < "00001111" then
-        a <= a+'1';
-      else 
-        a <= (others => '0');
-      end if;
+      a <= a+'1';
       wait for clk_period * 0.139;
    end process;
    
