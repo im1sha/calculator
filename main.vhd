@@ -36,7 +36,7 @@ architecture behavioral of main is
     constant n_zeros : std_logic_vector(n-1 downto 0) := (others => '0');
     constant n_ones : std_logic_vector(n-1 downto 0) := (others => '1');
 
-    -----------------------------COMPONENTS------------------------------------------------
+    -----------------------------components------------------------------------------------
     component segment_display
         port (clk : in std_logic;
               number : in  std_logic_vector(7 downto 0);
@@ -73,15 +73,23 @@ architecture behavioral of main is
               ready : out std_logic;
               ovfl :out std_logic);  
     end component;
+	 
+	 component sync_register is
+		generic ( n: integer);
+		port ( din : in  std_logic_vector (n-1 downto 0);
+           ce : in  std_logic;
+           c : in  std_logic;
+           dout : out  std_logic_vector (n-1 downto 0));	
+	end component;
     
-    -----------------------------OPERATIONS-----------------------------------------------
+    -----------------------------operations-----------------------------------------------
     constant code_add : std_logic_vector (1 downto 0) := "00";
     constant code_div : std_logic_vector (1 downto 0) := "10";
     constant code_mult : std_logic_vector (1 downto 0) := "11";
       
     signal current_operation_code : std_logic_vector (1 downto 0) := (others => '0');
-    -----------------------------STATES----------------------------------------------------
-    type states is (s0, s1, s2, sG, sS);
+    -----------------------------states----------------------------------------------------
+    type states is (s0, s1, s2, sg, ss);
     
     signal current_state, 
            next_state: states := s0;
@@ -89,7 +97,7 @@ architecture behavioral of main is
     signal current_operand_index : integer := 0; -- use with save button only
     signal get_completed, save_completed : std_logic := '0'; -- synchronization flags
          
-    -----------------------------OPERANDS--------------------------------------------------
+    -----------------------------operands--------------------------------------------------
     signal operand_2, -- result                    
            saved_operand : std_logic_vector (n-1 downto 0) := (others => '0');
             
@@ -98,28 +106,30 @@ architecture behavioral of main is
            output_operand -- displayed value
                 : std_logic_vector (n-1 downto 0) := (others => '0');
                 
-    ----------------------------ADD DIFF---------------------------------------------------                  
+    ----------------------------add diff---------------------------------------------------                  
     signal add_operand_2: std_logic_vector (n-1 downto 0);   
     constant add_in: std_logic := '0';
     signal add_out: std_logic; 
     
-    -----------------------------MULT------------------------------------------------------  
+    -----------------------------mult------------------------------------------------------  
     signal mult_operand_2: std_logic_vector (2*n-1 downto 0);
     signal mult_overflow: std_logic;  
 
-    -----------------------------DIV-------------------------------------------------------  
+    -----------------------------div-------------------------------------------------------  
     signal div_operand_2: std_logic_vector (n-1 downto 0); -- result  
    -- signal div_operand_2_copy: std_logic_vector (n-1 downto 0); -- result  
     signal div_remainder: std_logic_vector (n-1 downto 0);  
     signal div_go: std_logic := '0';   
     signal div_ready: std_logic := '0';  
     signal div_overflow: std_logic;  
-    
+    ----------------------------save-------------------------------------------------------
+	 
+	 signal nad_saved_operand : std_logic_vector (n-1 downto 0);
     ---------------------------------------------------------------------------------------    
     
 begin
    
-    -----------------------------DISPLAY COMPONENT-----------------------------------------                    
+    -----------------------------display component-----------------------------------------                    
     u0: segment_display 
         port map (clk => clk, 
                   number => output_operand, 
@@ -127,7 +137,7 @@ begin
                   seg => seg, 
                   an => an);
                   
-    ----------------------------ADD COMPONENTS---------------------------------------------                        
+    ----------------------------add components---------------------------------------------                        
      
     u1: add generic map (n => n) 
         port map (a => operand0, 
@@ -136,14 +146,14 @@ begin
                   c_in => add_in,
                   c_out => add_out);
                                              
-    ----------------------------MULT COMPONENTS--------------------------------------------                        
+    ----------------------------mult components--------------------------------------------                        
     u4: multiply generic map (n => n)
         port map (a => operand0,
                   b => operand1,
                   output => mult_operand_2, -- length == 2*n
                   longer_than_operand => mult_overflow); 
             
-    ----------------------------DIV COMPONENTS---------------------------------------------                        
+    ----------------------------div components---------------------------------------------                        
     u5: divide_wrapper generic map (total => n)
         port map(clk => clk,
                  go => div_go,
@@ -152,9 +162,16 @@ begin
                  quotient => div_operand_2,
                  remainder => div_remainder,  
                  ready => div_ready,
-                 ovfl => div_overflow);      
+                 ovfl => div_overflow);   
+
+	----------------------------div components---------------------------------------------
+	u6: sync_register generic map (n => n)
+		 port map ( din => nad_saved_operand,
+						ce => '1',
+						c => clk,
+						dout => saved_operand);
                   
-    -----------------------------DEBUG OUTPUT----------------------------------------------        
+    -----------------------------debug output----------------------------------------------        
     
     dubug_process: process(current_state, 
                            operand0,
@@ -180,9 +197,9 @@ begin
                 deb_state <= 1;
             elsif current_state = s2 then
                 deb_state <= 2;
-            elsif current_state = sG then
+            elsif current_state = sg then
                 deb_state <= 3;  
-            else --elsif current_state = sS then
+            else --elsif current_state = ss then
                 deb_state <= 4;
             end if;
     end process;   
@@ -241,8 +258,21 @@ begin
         --    div_go <= '0';       
         end if;
     end process;
-         
-    -----------------------------FSM OUTPUT------------------------------------------------    
+    -----------------------------save_process----------------------------------------------
+	 save_process : process (save_button, current_state, operand0, operand1, operand_2)
+	 begin
+		if save_button = '1' then
+			if current_state = s0 then
+				nad_saved_operand <= operand0;
+			elsif current_state = s1 then
+				nad_saved_operand <= operand1;
+			elsif current_state = s2 then
+				nad_saved_operand <= operand_2;
+			end if;
+		end if;
+	 end process;
+	
+    -----------------------------fsm output------------------------------------------------    
     fsm_phi: process (a,
                       current_state, 
                       operand0, 
@@ -258,6 +288,7 @@ begin
                 output_operand <= operand_2;
             when sg => 
                 output_operand <= saved_operand;
+					 
             when ss => 
                 if (current_operand_index = 0) or (current_operand_index = 1) then 
                     output_operand <= a;
@@ -269,7 +300,7 @@ begin
         end case;
     end process;
     
-    -----------------------------FSM STORAGE-----------------------------------------------    
+    -----------------------------fsm storage-----------------------------------------------    
     fsm_dff: process (clk,
                       next_state, 
                       reset_button)
@@ -281,7 +312,7 @@ begin
         end if;
     end process;
     
-    -----------------------------FSM TRANSITIONS------------------------------------------- 
+    -----------------------------fsm transitions------------------------------------------- 
     fsm_gamma: process (current_state, 
                         enter_button,
                         reset_button, 
@@ -298,9 +329,9 @@ begin
                 if rising_edge(enter_button) then
                     next_state <= s1;
                 elsif rising_edge(save_button) then      
-                    next_state <= sS;
+                    next_state <= ss;
                 elsif rising_edge(get_button) then
-                    next_state <= sG;
+                    next_state <= sg;
                 end if;
             when s1 => 
                 current_operand_index <= 1;
@@ -309,16 +340,16 @@ begin
                 elsif rising_edge(enter_button) then
                     next_state <= s2;
                 elsif rising_edge(save_button) then
-                    next_state <= sS;
+                    next_state <= ss;
                 elsif rising_edge(get_button) then
-                    next_state <= sG;
+                    next_state <= sg;
                 end if;
             when s2 => 
                 current_operand_index <= 2;
                 if rising_edge(reset_button) then
                     next_state <= s0;
                 elsif rising_edge(save_button) then
-                    next_state <= sS;
+                    next_state <= ss;
                 end if;                
             when ss => 
                 if rising_edge(clk) and (save_completed = '1') then 
