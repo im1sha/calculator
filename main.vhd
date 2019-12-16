@@ -137,6 +137,7 @@ architecture behavioral of main is
 	 signal save_enable :  std_logic := '0';
     ---------------------------------------------------------------------------------------    
     
+	 signal deb_count : std_logic_vector (n-1 downto 0) := (others => '0');
 begin
    
     -----------------------------display component-----------------------------------------                    
@@ -306,25 +307,35 @@ begin
                       operand1, 
                       operand_2, 
                       saved_operand,
-                      current_operand_index)
+                      current_operand_index,
+							 
+							 
+							 
+							 enter_button, deb_count)
     begin
-        case current_state is
-            when s0 | s1 =>           
-                output_operand <= a;
-            when s2 =>  
-                output_operand <= operand_2;
-            when sg => 
-                output_operand <= saved_operand;
-					 
-            when ss => 
-                if (current_operand_index = 0) or (current_operand_index = 1) then 
-                    output_operand <= a;
-                else 
-                    output_operand <= operand_2;
-                end if;
-            when others => 
-                output_operand <= operand_2;
-        end case;
+		if rising_edge(enter_button) then 
+			deb_count <= deb_count + 1 ;
+		end if;	
+		output_operand <= deb_count;
+		
+--        case current_state is
+--            when s0 | s1 =>           
+--                output_operand <= a;
+--            when s2 =>  
+--                output_operand <= operand_2;
+--            when sg => 
+--                output_operand <= saved_operand;
+--					 
+--            when ss => 
+--                if (current_operand_index = 0) or (current_operand_index = 1) then 
+--                    output_operand <= a;
+--                else 
+--                    output_operand <= operand_2;
+--                end if;
+--            when others => 
+--                output_operand <= operand_2;
+--        end case;
+
     end process;
     
     -----------------------------fsm storage-----------------------------------------------    
