@@ -143,12 +143,12 @@ begin
     u0: segment_display 
         port map (clk => clk, 
                   number => '0' & additional_code_operand(n-2 downto 0), 
-                  minus => additional_code_operand(n-1), --output_operand(n-1), 
+                  minus => additional_code_operand(n-1), 
                   seg => seg, 
                   an => an);
 						
     u7: code_converter generic map (n => n)
-		  port map ( sign => '0', --output_operand(n-1),
+		  port map ( sign => '0',
 					  in_vector => output_operand,
 					  out_vector => additional_code_operand); 
 					  
@@ -159,10 +159,7 @@ begin
                   b => operand1, 
                   s => add_operand_2, 
                   c_in => add_in,
-                  c_out => add_out);
-
-
-    
+                  c_out => add_out);  
 						
     ----------------------------mult components--------------------------------------------                        
     u4: multiply generic map (n => n)
@@ -182,12 +179,12 @@ begin
                  ready => div_ready,
                  ovfl => div_overflow);   
 
-	----------------------------div components---------------------------------------------
-	u6: sync_register generic map (n => n)
-		 port map ( din => not_saved_operand,
-						ce => save_enable,
-						c => clk,
-						dout => saved_operand);
+	--------------------------------------------------
+--	u6: sync_register generic map (n => n)
+--		 port map ( din => not_saved_operand,
+--						ce => save_enable,
+--						c => clk,
+--						dout => saved_operand);
 						
 						
 						
@@ -280,27 +277,27 @@ begin
         end if;
     end process;
     -----------------------------save_process----------------------------------------------
-	 save_process : process (save_button, save_enable)
-	 begin
-		if save_button = '1' then
-			save_enable <= '1';
-		else
-			save_enable <= '0';
-		end if;
-	 end process;
-	 
-	 process (save_enable, current_state, operand0, operand1, operand_2)
-	 begin
-		if rising_edge(save_enable) then
-			if current_state = s0 then
-				not_saved_operand <= operand0;
-			elsif current_state = s1 then
-				not_saved_operand <= operand1;
-			elsif current_state = s2 then
-				not_saved_operand <= operand_2;
-			end if;
-		end if;
-	 end process;
+--	 save_process : process (save_button, save_enable)
+--	 begin
+--		if save_button = '1' then
+--			save_enable <= '1';
+--		else
+--			save_enable <= '0';
+--		end if;
+--	 end process;
+--	 
+--	 process (save_enable, current_state, operand0, operand1, operand_2)
+--	 begin
+--		if rising_edge(save_enable) then
+--			if current_state = s0 then
+--				not_saved_operand <= operand0;
+--			elsif current_state = s1 then
+--				not_saved_operand <= operand1;
+--			elsif current_state = s2 then
+--				not_saved_operand <= operand_2;
+--			end if;
+--		end if;
+--	 end process;
 	
     -----------------------------fsm output------------------------------------------------    
     fsm_phi: process (a,
