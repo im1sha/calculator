@@ -68,7 +68,7 @@ ARCHITECTURE behavior OF main_tests IS
    --Inputs
    signal a : std_logic_vector(7 downto 0) := (others => '0');
    signal clk : std_logic := '0';
-   signal operation_switches : std_logic_vector(1 downto 0) := "10";
+   signal operation_switches : std_logic_vector(1 downto 0) := "00";
    signal reset_button : std_logic := '0';
    signal enter_button : std_logic := '0';
    signal save_button : std_logic := '0';
@@ -145,6 +145,14 @@ BEGIN
       enter_button <= '1';
       wait for clk_period;
       enter_button <= '0';  
+   end process;
+	
+   process
+   begin
+      wait for clk_period * 16;
+      save_button <= '1';
+      wait for clk_period;
+      save_button <= '0';  
    end process;
 
 

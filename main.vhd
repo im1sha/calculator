@@ -37,7 +37,15 @@ architecture behavioral of main is
     constant n_ones : std_logic_vector(n-1 downto 0) := (others => '1');
 
     -----------------------------components------------------------------------------------
-    component segment_display
+
+	 component code_converter 
+			 generic (n : integer);
+			 port ( sign : in  std_logic;
+					  in_vector : in  std_logic_vector (n-1 downto 0);
+					  out_vector : out  std_logic_vector (n-1 downto 0));
+	 end component;
+	 
+	 component segment_display
         port (clk : in std_logic;
               number : in  std_logic_vector(7 downto 0);
               minus : in std_logic;
@@ -103,7 +111,8 @@ architecture behavioral of main is
             
     signal operand0,
            operand1,           
-           output_operand -- displayed value
+           output_operand,
+			  additional_code_operand-- displayed value
                 : std_logic_vector (n-1 downto 0) := (others => '0');
                 
     ----------------------------add diff---------------------------------------------------                  
@@ -124,7 +133,8 @@ architecture behavioral of main is
     signal div_overflow: std_logic;  
     ----------------------------save-------------------------------------------------------
 	 
-	 signal nad_saved_operand : std_logic_vector (n-1 downto 0);
+	 signal not_saved_operand : std_logic_vector (n-1 downto 0);
+	 signal save_enable :  std_logic := '0';
     ---------------------------------------------------------------------------------------    
     
 begin
@@ -132,8 +142,8 @@ begin
     -----------------------------display component-----------------------------------------                    
     u0: segment_display 
         port map (clk => clk, 
-                  number => output_operand, 
-                  minus => output_operand(n-1), 
+                  number => '0' & additional_code_operand(n-2 downto 0), 
+                  minus => additional_code_operand(n-1), --output_operand(n-1), 
                   seg => seg, 
                   an => an);
                   
@@ -145,7 +155,13 @@ begin
                   s => add_operand_2, 
                   c_in => add_in,
                   c_out => add_out);
-                                             
+
+
+    u7: code_converter generic map (n => n)
+		  port map ( sign => output_operand(n-1),
+					  in_vector => output_operand,
+					  out_vector => additional_code_operand);
+						
     ----------------------------mult components--------------------------------------------                        
     u4: multiply generic map (n => n)
         port map (a => operand0,
@@ -166,10 +182,13 @@ begin
 
 	----------------------------div components---------------------------------------------
 	u6: sync_register generic map (n => n)
-		 port map ( din => nad_saved_operand,
-						ce => '1',
+		 port map ( din => not_saved_operand,
+						ce => save_enable,
 						c => clk,
 						dout => saved_operand);
+						
+						
+						
                   
     -----------------------------debug output----------------------------------------------        
     
@@ -259,15 +278,24 @@ begin
         end if;
     end process;
     -----------------------------save_process----------------------------------------------
-	 save_process : process (save_button, current_state, operand0, operand1, operand_2)
+	 save_process : process (save_button, save_enable)
 	 begin
 		if save_button = '1' then
+			save_enable <= '1';
+		else
+			save_enable <= '0';
+		end if;
+	 end process;
+	 
+	 process (save_enable, current_state, operand0, operand1, operand_2)
+	 begin
+		if rising_edge(save_enable) then
 			if current_state = s0 then
-				nad_saved_operand <= operand0;
+				not_saved_operand <= operand0;
 			elsif current_state = s1 then
-				nad_saved_operand <= operand1;
+				not_saved_operand <= operand1;
 			elsif current_state = s2 then
-				nad_saved_operand <= operand_2;
+				not_saved_operand <= operand_2;
 			end if;
 		end if;
 	 end process;

@@ -22,7 +22,7 @@ begin
    end generate;
 end structural;
 
-architecture behavioral of syncregister is
+architecture behavioral of sync_register is
 signal reg : std_logic_vector (n-1 downto 0) := (others => '0');
 begin
    main : process ( din, ce, c )
