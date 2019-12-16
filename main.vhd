@@ -146,7 +146,12 @@ begin
                   minus => additional_code_operand(n-1), --output_operand(n-1), 
                   seg => seg, 
                   an => an);
-                  
+						
+    u7: code_converter generic map (n => n)
+		  port map ( sign => '0', --output_operand(n-1),
+					  in_vector => output_operand,
+					  out_vector => additional_code_operand); 
+					  
     ----------------------------add components---------------------------------------------                        
      
     u1: add generic map (n => n) 
@@ -157,10 +162,7 @@ begin
                   c_out => add_out);
 
 
-    u7: code_converter generic map (n => n)
-		  port map ( sign => output_operand(n-1),
-					  in_vector => output_operand,
-					  out_vector => additional_code_operand);
+    
 						
     ----------------------------mult components--------------------------------------------                        
     u4: multiply generic map (n => n)
