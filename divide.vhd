@@ -143,15 +143,13 @@ entity divide is
    
     ovfl <= '1' when ( state_reg=idle and ( m(total*2-1 downto total) >= n ) ) 
                 else '0';               
-    process(state_reg, state_next,clk, reset,is_ready)
+    process(state_reg, state_next,clk, reset, is_ready)
     begin
         if reset = '1' then 
             is_ready <= '0';
-        end if;
-        if rising_edge(clk) then
-            if (state_reg /= idle) and (idle = state_next) and (is_ready = '0') then
-                is_ready <= '1' ;
-            end if;
+        elsif rising_edge(clk) and (state_reg /= idle) and (idle = state_next) and (is_ready = '0') then
+            is_ready <= '1' ;
+           -- end if;
         end if;
     end process;
     

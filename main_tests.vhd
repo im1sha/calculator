@@ -55,10 +55,12 @@ ARCHITECTURE behavior OF main_tests IS
          deb_0 : out std_logic_vector(7 downto 0);
          deb_1 : out std_logic_vector(7 downto 0);
          deb_2 : out std_logic_vector(7 downto 0);
-         deb_s : out std_logic_vector(7 downto 0);          
+         deb_s : out std_logic_vector(7 downto 0);   
+         deb_divop2 : out std_logic_vector(7 downto 0);        
          deb_index: out integer;
          deb_state: out integer;     
-         deb_output : out std_logic_vector(7 downto 0)          
+         deb_output : out std_logic_vector(7 downto 0) ;
+         deb_ready : out std_logic
         );
     END COMPONENT;
     
@@ -81,9 +83,11 @@ ARCHITECTURE behavior OF main_tests IS
    signal deb_2 : std_logic_vector(7 downto 0);
    signal deb_s : std_logic_vector(7 downto 0);
    signal deb_output : std_logic_vector(7 downto 0);
+      signal       deb_divop2 :  std_logic_vector(7 downto 0);
+
    signal deb_index :integer;
    signal deb_state :integer;
-
+ signal deb_ready : std_logic := '0';
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -104,9 +108,11 @@ BEGIN
           deb_1 => deb_1,
           deb_2 => deb_2,
           deb_s => deb_s,
+          deb_divop2 => deb_divop2,
           deb_index => deb_index,
           deb_state => deb_state,
-          deb_output => deb_output
+          deb_output => deb_output,
+          deb_ready => deb_ready
         );
    
 

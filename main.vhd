@@ -20,9 +20,11 @@ entity main is
            deb_1 : out std_logic_vector(n-1 downto 0);
            deb_2 : out std_logic_vector(n-1 downto 0);
            deb_s : out std_logic_vector(n-1 downto 0);
+           deb_divop2 : out std_logic_vector(n-1 downto 0);
            deb_index: out integer;
            deb_state: out integer;
-           deb_output: out std_logic_vector(n-1 downto 0)
+           deb_output: out std_logic_vector(n-1 downto 0);
+           deb_ready : out std_logic
            ); -- debug output
 end main;
 
@@ -105,9 +107,10 @@ architecture behavioral of main is
 
     -----------------------------DIV-------------------------------------------------------  
     signal div_operand_2: std_logic_vector (n-1 downto 0); -- result  
+   -- signal div_operand_2_copy: std_logic_vector (n-1 downto 0); -- result  
     signal div_remainder: std_logic_vector (n-1 downto 0);  
     signal div_go: std_logic := '0';   
-    signal div_ready: std_logic;  
+    signal div_ready: std_logic := '0';  
     signal div_overflow: std_logic;  
     
     ---------------------------------------------------------------------------------------    
@@ -157,8 +160,12 @@ begin
                            operand_2,
                            saved_operand,
                            output_operand,
-                           current_operand_index)
+                           current_operand_index,
+                           div_ready,
+                           div_operand_2)
     begin
+            deb_divop2 <= div_operand_2;
+            deb_ready <= div_ready;
             deb_0 <= operand0;
             deb_1 <= operand1;
             deb_2 <= operand_2;
@@ -192,7 +199,9 @@ begin
         end if;  
     end process;   
     
-    ---------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------       
+
+
     operations_process: process (clk,
                                  current_state,
                                  current_operation_code,
@@ -202,12 +211,11 @@ begin
                                  mult_operand_2
                                  )   
     begin
-        if (current_state = s2) then                                  
-            if current_operation_code = code_div then
-                div_go <= '1';
-                if div_ready = '1' then                     
-                    operand_2 <= div_operand_2; 
-                end if;
+        if (rising_edge(div_ready)) and (current_state = s2) and (current_operation_code = code_div) then      
+            operand_2 <= div_operand_2;      
+        elsif (current_state = s2) then                                  
+            if (current_operation_code = code_div) then
+                div_go <= '1';     
             else
                 div_go <= '0';
                 if current_operation_code = code_add then
@@ -218,8 +226,8 @@ begin
                     operand_2 <= (others => '1');
                 end if;
             end if;
-        else
-        div_go <= '0';
+        else 
+            div_go <= '0';       
         end if;
     end process;
          

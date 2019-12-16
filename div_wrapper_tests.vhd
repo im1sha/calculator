@@ -105,11 +105,11 @@ BEGIN
 	start_proc: process
 	begin
 		
-        wait for clk_period;    
+        wait for clk_period/6;    
         go <= '1';
 
 		wait for clk_period*100;
-        go <= '0';  
+       -- go <= '0';  
 
 	end process;
  
