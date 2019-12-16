@@ -32,32 +32,31 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY div_tests IS
-END div_tests;
+ENTITY div_wrapper_tests IS
+END div_wrapper_tests;
  
-ARCHITECTURE behavior OF div_tests IS 
+ARCHITECTURE behavior OF div_wrapper_tests IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT divide
+    COMPONENT divide_wrapper
     PORT(
          clk : IN  std_logic;
-         reset : IN  std_logic;
-         start : IN  std_logic;
+         go : IN  std_logic;
          m : IN  std_logic_vector(15 downto 0);
          n : IN  std_logic_vector(7 downto 0);
          quotient : OUT  std_logic_vector(7 downto 0);
          remainder : OUT  std_logic_vector(7 downto 0);
          ready : OUT  std_logic;
-         ovfl : OUT  std_logic
+         ovfl : OUT  std_logic--;
+         --deb_state : out integer
         );
     END COMPONENT;
     
 
    --Inputs
    signal clk : std_logic := '0';
-   signal reset : std_logic := '0';
-   signal start : std_logic := '0';
+   signal go : std_logic := '0';
    signal m : std_logic_vector(15 downto 0) := (others => '0');
    signal n : std_logic_vector(7 downto 0) := (others => '0');
 
@@ -66,6 +65,7 @@ ARCHITECTURE behavior OF div_tests IS
    signal remainder : std_logic_vector(7 downto 0);
    signal ready : std_logic;
    signal ovfl : std_logic;
+   signal deb_state : integer;
 
    -- Clock period definitions
    constant clk_period : time := 10 ns;
@@ -73,17 +73,17 @@ ARCHITECTURE behavior OF div_tests IS
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
-   uut: divide PORT MAP (
+   uut: divide_wrapper PORT MAP (
           clk => clk,
-          reset => reset,
-          start => start,
+          go => go,
           m => m,
           n => n,
           quotient => quotient,
           remainder => remainder,
           ready => ready,
-          ovfl => ovfl
-        );
+          ovfl => ovfl--,
+          --deb_state => deb_state
+          );
 
    -- Clock process definitions
    clk_process :process
@@ -106,18 +106,10 @@ BEGIN
 	begin
 		
         wait for clk_period;    
-        reset <= '1';		
-        start <= '0';  
-        
-        wait for clk_period;
-		start <= '1';    
-        reset <= '0';   
-        wait for clk_period;
+        go <= '1';
 
-        reset <= '0';		
-        start <= '0';   
 		wait for clk_period*100;
-
+        go <= '0';  
 
 	end process;
  

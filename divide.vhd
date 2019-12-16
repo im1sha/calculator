@@ -22,16 +22,16 @@ entity divide is
 
     -- inputs/outputs of the state register and the z, d, and i registers
 
-    signal state_reg, state_next : state_type;   
+    signal state_reg, state_next : state_type := idle;   
     signal z_reg, z_next : unsigned(total * 2 downto 0);   
     signal d_reg, d_next : unsigned(total - 1 downto 0);
     signal i_reg, i_next : unsigned(total / 2 - 1 downto 0);
     constant i_next_bound_value : unsigned(total / 2 - 1 downto 0) := (total / 2 - 1 => '1', others => '0'); --"1000"
     signal quotient_store, remainder_store :std_logic_vector (total - 1 downto 0) := (others => '0');
-    signal current_clock: integer := 0;
+    --signal current_clock: integer := 0;
     -- the subtraction output 
     signal sub : unsigned(total downto 0);
-          
+    signal is_ready: std_logic := '0';     
  begin
       --control path: registers of the fsm
       process(clk, reset, state_next)
@@ -72,11 +72,7 @@ entity divide is
             end case;
         end process;
                 
-    --control path: output logic
-    ready <= '1' when state_reg=idle else
-            '0';
-    ovfl <= '1' when ( state_reg=idle and ( m(total*2-1 downto total) >= n ) ) else
-        '0';
+
                             
     --control path: registers of the counter used to count the iterations
     process(clk, reset, i_next)
@@ -141,31 +137,33 @@ entity divide is
     --data path: functional units
     sub <= ( z_reg(total*2 downto total) - unsigned('0' & n) );
         
---    --data path: output
-   quotient <= std_logic_vector( z_reg(total-1 downto 0) );
-   remainder <= std_logic_vector( z_reg(total*2-1 downto total) );
---        
-
---    process(clk, current_clock, reset)
---    begin
---        if (reset='1') then
---            current_clock <= 0;
---        elsif rising_edge(clk) then 
---            current_clock <= current_clock + 1;
---        end if;    
---    end process;
---
---    output_process: process(reset, z_reg, clk, current_clock, quotient_store, remainder_store)
---    begin
---        if (reset='1') then
---            quotient_store <= (others => '0');
---            remainder_store <= (others => '0');
---        elsif rising_edge(clk) and (current_clock = total * 2) then 
---            quotient_store <= std_logic_vector( z_reg(total-1 downto 0));
---            remainder_store <= std_logic_vector( z_reg(total*2-1 downto total));
---        end if;
---        quotient <= quotient_store;
---        remainder <= remainder_store;
---    end process;
+   
         
+    --control path: output logic
+   
+    ovfl <= '1' when ( state_reg=idle and ( m(total*2-1 downto total) >= n ) ) 
+                else '0';               
+    process(state_reg, state_next,clk, reset,is_ready)
+    begin
+        if reset = '1' then 
+            is_ready <= '0';
+        end if;
+        if rising_edge(clk) then
+            if (state_reg /= idle) and (idle = state_next) and (is_ready = '0') then
+                is_ready <= '1' ;
+            end if;
+        end if;
+    end process;
+    
+    process(is_ready,z_reg)
+    begin 
+        if is_ready = '0' then
+            quotient_store <= std_logic_vector( z_reg(total-1 downto 0) );
+            remainder_store <= std_logic_vector( z_reg(total*2-1 downto total) );
+        end if;
+    end process;
+    
+    quotient <= quotient_store;
+    remainder <= remainder_store;
+    ready <= is_ready;   
 end behavioral;

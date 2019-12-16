@@ -58,11 +58,10 @@ architecture behavioral of main is
               longer_than_operand : out std_logic);
     end component;
        
-    component divide is
+    component divide_wrapper is
         generic (total: integer);
         port (clk : in std_logic;
-              reset: in std_logic;
-              start : in std_logic;
+              go: in std_logic;
               m : in  std_logic_vector (total*2-1 downto 0);     
               n : in  std_logic_vector (total-1 downto 0);    
               quotient : out  std_logic_vector (total-1 downto 0);  
@@ -101,17 +100,15 @@ architecture behavioral of main is
     signal add_out: std_logic; 
     
     -----------------------------MULT------------------------------------------------------  
-    signal mult_operand2: std_logic_vector (2*n-1 downto 0);
+    signal mult_operand_2: std_logic_vector (2*n-1 downto 0);
     signal mult_overflow: std_logic;  
 
     -----------------------------DIV-------------------------------------------------------  
-    signal div_operand2: std_logic_vector (n-1 downto 0); -- result  
+    signal div_operand_2: std_logic_vector (n-1 downto 0); -- result  
     signal div_remainder: std_logic_vector (n-1 downto 0);  
-    signal div_reset: std_logic := '0';   
-    signal div_start: std_logic := '0';  
+    signal div_go: std_logic := '0';   
     signal div_ready: std_logic;  
     signal div_overflow: std_logic;  
-    signal div_started: integer := 0;
     
     ---------------------------------------------------------------------------------------    
     
@@ -138,17 +135,16 @@ begin
     u4: multiply generic map (n => n)
         port map (a => operand0,
                   b => operand1,
-                  output => mult_operand2, -- length == 2*n
+                  output => mult_operand_2, -- length == 2*n
                   longer_than_operand => mult_overflow); 
             
     ----------------------------DIV COMPONENTS---------------------------------------------                        
-    u5: divide generic map (total => n)
+    u5: divide_wrapper generic map (total => n)
         port map(clk => clk,
-                 reset => div_reset,
-                 start => div_start,
+                 go => div_go,
                  m => n_zeros & operand0, 
                  n => operand1,
-                 quotient => div_operand2,
+                 quotient => div_operand_2,
                  remainder => div_remainder,  
                  ready => div_ready,
                  ovfl => div_overflow);      
@@ -201,36 +197,29 @@ begin
                                  current_state,
                                  current_operation_code,
                                  div_ready,
-                                 div_started,
                                  add_operand_2,
-                                 div_operand2,
-                                 mult_operand2
+                                 div_operand_2,
+                                 mult_operand_2
                                  )   
     begin
-        if rising_edge(clk) and (current_state = s2) then                                  
+        if (current_state = s2) then                                  
             if current_operation_code = code_div then
-                if div_started = 0 then 
-                    div_started <= 1;
-                    div_start <= '1';
-                    div_reset <= '1';
-                else 
-                    div_start <= '0';
-                    div_reset <= '0';
-                    if div_ready = '1' then                        
-                        operand_2 <= div_operand2; 
-                    end if;
+                div_go <= '1';
+                if div_ready = '1' then                     
+                    operand_2 <= div_operand_2; 
                 end if;
             else
-                div_started <= 0; -- reset div calculations
-                
+                div_go <= '0';
                 if current_operation_code = code_add then
                     operand_2 <= add_operand_2;      
                 elsif current_operation_code = code_mult then                
-                    operand_2 <= mult_operand2(2*n - 1) & mult_operand2(n-2 downto 0);     
+                    operand_2 <= mult_operand_2(2*n - 1) & mult_operand_2(n-2 downto 0);     
                 else          
                     operand_2 <= (others => '1');
                 end if;
             end if;
+        else
+        div_go <= '0';
         end if;
     end process;
          
