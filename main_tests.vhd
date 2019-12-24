@@ -147,13 +147,13 @@ BEGIN
       enter_button <= '0';  
    end process;
 	
---   process
---   begin
---      wait for clk_period * 16;
---      save_button <= '1';
---      wait for clk_period;
---      save_button <= '0';  
---   end process;
+   process
+   begin
+      wait for clk_period * 16;
+      save_button <= '1';
+      wait for clk_period;
+      save_button <= '0';  
+   end process;
 
 
 
