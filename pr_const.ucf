@@ -1,0 +1,46 @@
+# clock signal
+
+NET Clk LOC = E3 | IOSTANDARD = "LVCMOS33"; #clock
+
+
+#buttons
+NET reset_button LOC = T16 | IOSTANDARD = "LVCMOS33"; #btnL
+NET enter_button LOC = R10 | IOSTANDARD = "LVCMOS33"; #btnR
+NET save_button LOC = F15 | IOSTANDARD = "LVCMOS33"; #btnU
+NET get_button LOC = V10 | IOSTANDARD = "LVCMOS33"; #btnD
+
+#a
+NET a[0] LOC = U9 | IOSTANDARD = "LVCMOS33"; #sw0
+NET a[1] LOC = U8 | IOSTANDARD = "LVCMOS33"; #sw1
+NET a[2] LOC = R7 | IOSTANDARD = "LVCMOS33"; #sw2
+NET a[3] LOC = R6 | IOSTANDARD = "LVCMOS33"; #sw3
+NET a[4] LOC = R5 | IOSTANDARD = "LVCMOS33"; #sw4
+NET a[5] LOC = V7 | IOSTANDARD = "LVCMOS33"; #sw5
+NET a[6] LOC = V6 | IOSTANDARD = "LVCMOS33"; #sw6
+NET a[7] LOC = V5 | IOSTANDARD = "LVCMOS33"; #sw7
+
+#sw
+NET operation_switches[0] LOC = P3 | IOSTANDARD = "LVCMOS33"; #sw14
+NET operation_switches[1] LOC = P4 | IOSTANDARD = "LVCMOS33"; #sw15
+
+
+# seven-segment LED display
+
+
+NET seg[6] LOC = L3 | IOSTANDARD = "LVCMOS33"; #ca
+NET seg[5] LOC = N1 | IOSTANDARD = "LVCMOS33"; #cb
+NET seg[4] LOC = L5 | IOSTANDARD = "LVCMOS33"; #cc
+NET seg[3] LOC = L4 | IOSTANDARD = "LVCMOS33"; #cd
+NET seg[2] LOC = K3 | IOSTANDARD = "LVCMOS33"; #ce
+NET seg[1] LOC = M2 | IOSTANDARD = "LVCMOS33"; #cf
+NET seg[0] LOC = L6 | IOSTANDARD = "LVCMOS33"; #cg
+
+
+NET an[0] LOC = N6 | IOSTANDARD = "LVCMOS33"; #an0
+NET an[1] LOC = M6 | IOSTANDARD = "LVCMOS33"; #an1
+NET an[2] LOC = M3 | IOSTANDARD = "LVCMOS33"; #an2
+NET an[3] LOC = N5 | IOSTANDARD = "LVCMOS33"; #an3
+NET an[4] LOC = N2 | IOSTANDARD = "LVCMOS33"; #an4
+NET an[5] LOC = N4 | IOSTANDARD = "LVCMOS33"; #an5
+NET an[6] LOC = L1 | IOSTANDARD = "LVCMOS33"; #an6
+NET an[7] LOC = M1 | IOSTANDARD = "LVCMOS33"; #an7
